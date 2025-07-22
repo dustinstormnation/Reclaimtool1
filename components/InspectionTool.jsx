@@ -1,48 +1,75 @@
-import { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import { Camera, Ruler, FileText, Plus, Save } from 'lucide-react';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
-import { storage } from '../firebase'; // your Firebase init
+import { storage } from '../firebase';
+import '../styles/globals.css';
 
 export default function InspectionTool() {
+  // 1) All your existing state hooks:
+  const [inspectionTab, setInspectionTab] = useState('camera');
+  const [checklistItems, setChecklistItems] = useState([ /* …your array… */ ]);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [measurements, setMeasurements] = useState([]);
+  const [notes, setNotes] = useState('');
   const [findings, setFindings] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingAI, setLoadingAI] = useState(false);
 
+  // 2) Your camera start/stop/capture functions…
+  const startCamera = async () => { /* … */ }
+  const stopCamera = () => { /* … */ }
+  const capturePhoto = async () => {
+    // draw image to canvas
+    const base64 = canvasRef.current.toDataURL('image/jpeg');
+    // upload & analyze if you want
+    // …
+  };
+
+  // 3) Your checklist toggle/addPhoto handlers…
+  const toggleChecklistItem = (id) => { /* … */ }
+  const addPhoto = (id) => { /* … */ }
+
+  // 4) Your Measurement UI…
+  const addMeasurement = () => { /* … */ }
+
+  // 5) Your AI analyze function (if you already wired it in)…
   async function analyzePhoto(base64, itemId) {
-    setLoading(true);
-    // 1. Upload to Firebase
-    const path = `inspections/${Date.now()}/${itemId}.jpg`;
-    const storageRef = ref(storage, path);
-    await uploadString(storageRef, base64, 'data_url');
-    const imageUrl = await getDownloadURL(storageRef);
-
-    // 2. Call your new API route
-    const resp = await fetch('/api/assess', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageUrl }),
-    });
-    const { findings } = await resp.json();
-    setFindings(findings);
-    setLoading(false);
+    setLoadingAI(true);
+    // upload to Firebase, get URL…
+    // fetch('/api/assess', …)
+    // setFindings(…)
+    setLoadingAI(false);
   }
 
-  // ...in your capturePhoto handler, call analyzePhoto(canvasData, item.id)
+  // 6) Then your two tab components:
+  const CameraTab = () => (
+    <div> {/* your camera UI and buttons here */} </div>
+  );
+  const ChecklistTab = () => (
+    <div> {/* your checklist UI here */} </div>
+  );
+
+  // 7) Final render helper:
+  const renderInspectionContent = () =>
+    inspectionTab === 'camera' ? <CameraTab/> : <ChecklistTab/>;
 
   return (
-    <div>
-      {/* existing checklist & camera UI here */}
-      {loading && <p>Analyzing image… 🔍</p>}
-      {findings.length > 0 && (
-        <section>
-          <h2>AI Findings</h2>
-          <ul>
-            {findings.map((f, i) => (
-              <li key={i}>
-                {f.label} — {(f.confidence * 100).toFixed(0)}%  
-                <pre>{JSON.stringify(f.box)}</pre>
-              </li>
-            ))}
-          </ul>
-        </section>
+    <div className="space-y-6">
+      {/* Tab switcher */}
+      <div className="flex space-x-2">
+        <button onClick={() => setInspectionTab('camera')}>Camera & Tools</button>
+        <button onClick={() => setInspectionTab('checklist')}>Field Checklist</button>
+      </div>
+
+      {/* The actual content */}
+      {renderInspectionContent()}
+
+      {/* Optional: AI Findings */}
+      {loadingAI && <p>Analyzing…</p>}
+      {!!findings.length && (
+        <ul>{findings.map((f,i)=><li key={i}>{f.label}: {f.confidence}</li>)}</ul>
       )}
     </div>
   );
