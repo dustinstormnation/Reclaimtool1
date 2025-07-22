@@ -1,8 +1,10 @@
-export default function InspectionTool() {
-  return (
-    <div style={{ padding: 20 }}>
-      <h1>Reclaim Inspection Tool</h1>
-      <p>Loading your AI-powered roofing inspection…</p>
-    </div>
-  )
+import dynamic from 'next/dynamic';
+
+const InspectionTool = dynamic(
+  () => import('../components/InspectionTool'),
+  { ssr: false }
+);
+
+export default function Home() {
+  return <InspectionTool />;
 }
