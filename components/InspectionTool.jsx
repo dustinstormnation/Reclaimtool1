@@ -68,7 +68,17 @@ const InspectionTool = () => {
     canvas.getContext('2d').drawImage(video, 0, 0);
     alert('Photo captured! In a real app, this would be saved.');
   };
-
+ const analyzePhoto = async (base64, itemId) => {
+  setLoadingAI(true)
+  const resp = await fetch('/api/assess', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ imageBase64: base64, itemId })
+  })
+  const { findings } = await resp.json()
+  setFindings(prev => ({ ...prev, [itemId]: findings }))
+  setLoadingAI(false)
+} 
   // Measurement tool
   const [measurements, setMeasurements] = useState([]);
   const addMeasurement = () => {
