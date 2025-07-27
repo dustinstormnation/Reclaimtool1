@@ -280,3 +280,45 @@ const InspectionTool = () => {
 };
 
 export default InspectionTool;
+// ...existing imports...
+import { useState, useRef, useEffect } from 'react'
+import { Camera, Ruler, FileText, Plus, Save } from 'lucide-react'
+
+const InspectionTool = () => {
+  // ...state hooks...
+  const [errorMsg, setErrorMsg] = useState('');
+  // ...existing code...
+
+  const analyzePhoto = async (base64, itemId) => {
+    setLoadingAI(true)
+    setErrorMsg('')
+    try {
+      const resp = await fetch('/api/assess', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: base64, itemId })
+      })
+      if (!resp.ok) {
+        throw new Error('AI assessment failed')
+      }
+      const { findings } = await resp.json()
+      setFindings(prev => ({ ...prev, ...findings }))
+    } catch (err) {
+      setErrorMsg('AI analysis failed. Please try again.')
+    }
+    setLoadingAI(false)
+  }
+
+  // ...rest of the component...
+
+  return (
+    <div className="space-y-6">
+      {errorMsg && (
+        <div className="bg-red-100 text-red-700 px-4 py-2 rounded">{errorMsg}</div>
+      )}
+      {/* ...rest of your JSX... */}
+    </div>
+  )
+}
+
+export default InspectionTool
