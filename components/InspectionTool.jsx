@@ -1,3 +1,16 @@
+// Add this state at the top
+const [infoMsg, setInfoMsg] = useState('');
+
+// Replace addPhoto function
+const addPhoto = (id) => {
+  setChecklistItems(items =>
+    items.map(item =>
+      item.id === id ? { ...item, photos: item.photos + 1 } : item
+    )
+  );
+  setInfoMsg('Photo captured! (Demo: not actually saved)');
+  setTimeout(() => setInfoMsg(''), 2000);
+};
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Ruler, FileText, Plus, Save } from 'lucide-react';
 
