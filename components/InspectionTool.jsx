@@ -337,3 +337,39 @@ const InspectionTool = () => {
 }
 
 export default InspectionTool
+// Add to top-level state:
+const [photos, setPhotos] = useState(() => {
+  try {
+    return JSON.parse(localStorage.getItem('photos')) || {};
+  } catch {
+    return {};
+  }
+});
+
+// Replace addPhoto:
+const addPhoto = (id, base64Image) => {
+  setChecklistItems(items =>
+    items.map(item =>
+      item.id === id ? { ...item, photos: item.photos + 1 } : item
+    )
+  );
+  setPhotos(prev => {
+    const updated = { ...prev, [id]: [...(prev[id] || []), base64Image] };
+    localStorage.setItem('photos', JSON.stringify(updated));
+    return updated;
+  });
+  setInfoMsg('Photo saved to local storage!');
+  setTimeout(() => setInfoMsg(''), 2000);
+};
+
+// Update capturePhoto to actually save the photo
+const capturePhoto = (id) => {
+  const canvas = canvasRef.current;
+  const video = videoRef.current;
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  const base64Image = canvas.toDataURL('image/png');
+  addPhoto(id, base64Image);
+};
+
