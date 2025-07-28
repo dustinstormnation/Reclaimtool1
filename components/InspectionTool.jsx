@@ -51,7 +51,7 @@ const InspectionTool = () => {
         item.id === id ? { ...item, photos: item.photos + 1 } : item
       )
     );
-    alert('Photo captured! In production, this would save to the checklist item.');
+    alert
   };
 
   // Camera setup
@@ -81,7 +81,7 @@ const InspectionTool = () => {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
-    alert('Photo captured! In a real app, this would be saved.');
+    alert
   };
  const analyzePhoto = async (base64, itemId) => {
   setLoadingAI(true)
